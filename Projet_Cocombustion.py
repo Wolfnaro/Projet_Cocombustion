@@ -12,10 +12,9 @@ Info sur la version
 Projet du cocombustion avancé avec les 08 hypothèses avec les considerations suivantes :
     - Vesion juste avant la correction du professeur
     - Puissance nominale = 150 MWh
-    - 20 optimisation à 20ans
+    - Optimisation à 20ans
     - Plusieurs fournisseurs de bois frais 
     - Morceaux residus vert defini
-    Test
 """
 
 from gurobipy import *

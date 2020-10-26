@@ -15,6 +15,7 @@ Projet du cocombustion avancé avec les 08 hypothèses avec les considerations s
     - 20 optimisation à 20ans
     - Plusieurs fournisseurs de bois frais 
     - Morceaux residus vert defini
+    Test
 """
 
 from gurobipy import *

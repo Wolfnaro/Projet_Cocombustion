@@ -43,10 +43,10 @@ import numpy as np
 # Unites (Il faut changer que ton selon l'unité qu'on veux avoir)
 ton = 0.001                                     # On va afficher tout en Kton
 kt = 1000 * ton                                 # kton
-euro = 1/1000000                               # Milliard
+euro = 1/1000000                               # Millions
 k_euro = 1000 * euro
 megajoule = 1/3600                              # MWh (facteur pour passer de joules a MWh)
-terajoule = 1000 * megajoule                    # MWh
+terajoule = 1000000 * megajoule                    # MWh
 ###########################################################################
 
 puissance_nominale = 250                        # MW    Pourquoi 250 ???????
@@ -167,7 +167,7 @@ for i in range(horizon):
         MASSE[c,i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = dispo[c], name=f'm{c}{i}')
     for p in bois_prove:
         MASSE_BOIS_PROVE[p,i] = model.addVar(lb = 0, ub = dispo_bois(p, i), vtype = GRB.CONTINUOUS, name=f'mb{p}{i}')
-#    INCORPORATION_BIOMASSE[i] = model.addVar(vtype = GRB.BINARY, name=f'incorp_biomasse{i}')
+    INCORPORATION_BIOMASSE[i] = model.addVar(vtype = GRB.BINARY, name=f'incorp_biomasse{i}')
 
 ###########################################################################
 # Definition des relations et contraintes 
@@ -176,8 +176,8 @@ for i in range(horizon):
 utilite = []
 for i in range(horizon):
     utilite.append(quicksum((p_vente(c) * pci(c) * efficacite - p_achat[c]) * MASSE[c,i] for c in combustibles)
-                   - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove))
-#                   - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
+                   - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove)
+                   - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
 
 objective = quicksum(utilite[i] for i in range(horizon)) - instalation_sechage - duplic_capacite
     
@@ -192,7 +192,7 @@ CONTR_PROD  = []     # (m_c(t) * PCI_c + SUM_1(m_i(t) * PCI_i)) = Energie Brute 
 CONTR_STOCK = []     # m_b + m_v + m_r <= 1500 * 365
 CONTR_BOIS  = []     # m_b = SUM_2(m_bj(t))
 #CONTR_SECH  = []     # Capacité maximale de séchage : 150 kt (H8)
-#CONTR_COUT_INCORPO = []
+CONTR_COUT_INCORPO = []
 
 masse_max_charbon = energ_brut / pci('carb')
 
@@ -204,7 +204,7 @@ for i in range(horizon):
     CONTR_STOCK.append(model.addConstr(biomasse_brute <= 365 * capacite_jour))
     CONTR_BOIS.append(model.addConstr(MASSE['bois', i] ==  quicksum(MASSE_BOIS_PROVE[p,i] for p in bois_prove)))
 #    CONTR_SECH.append(model.addConstr(biomasse_brute <= capacite_sechage))
-#    CONTR_COUT_INCORPO.append(model.addConstr(biomasse >= MASSE['carb', i] - masse_max_charbon * (1 - INCORPORATION_BIOMASSE[i])))
+    CONTR_COUT_INCORPO.append(model.addConstr(biomasse >= MASSE['carb', i] - masse_max_charbon * (1 - INCORPORATION_BIOMASSE[i])))
 model.write('new.lp')
 model.optimize()
 assert model.status == GRB.status.OPTIMAL, f"solver stopped with status {M.status}"

@@ -28,7 +28,6 @@ Faudra remplir dans un txt les valeurs :
 # segun el sujet habia una ganancia que miles de euros y no en millards (quizas es exagerado el monto)
 # revisa cuanto sale solo tomando carbono.
 ###########################################################################
-
 from gurobipy import *
 import numpy as np
 
@@ -217,5 +216,17 @@ for i in (0, horizon-1):
     print(f"profit pour année {i+1} = {utilite[i].getValue():.2f}")
     ratio = MASSE['carb',i].x / sum(MASSE[c,i].x for c in combustibles)
     print(f"ratio charbon/masse totale à année {i+1} est : {ratio*100:.0f} %")
+    
+# Calcul du coefficient des Masses, ceci afin de sav
+    for c in combustibles:
+        coef_combustible = pci(c)*efficacite*p_vente(c) - p_achat[c] 
+        print(f"{c}: {coef_combustible.x:.1f}")
+    
+# 
+    for b in bois_prove:
+        coef_combustible = pci(b)*efficacite*p_vente(b) - p_achat_bois[b] 
+        print(f"{b}: {coef_combustible.x:.1f}")
+        
+        
 
 

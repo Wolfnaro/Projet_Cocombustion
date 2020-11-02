@@ -1,0 +1,106 @@
+Anciens variables : 
+- mass_vert
+- mass_bois  (x12)
+- mass_torr
+
+Nouvelles variables :
+- m_vert_a_sech 
+- m_vert_humid 
+- m_bois_a_sech   (x12)
+- m_bois_humid   (x12)
+- m_torr_a_sech 
+- m_torr_humid 
+- mass_seché 
+
+Conditions : 
+- mass_vert = m_vert_a_sech + m_vert_humid 
+- mass_bois = m_bois_a_sech + m_bois_humid   (x12)
+- mass_torr = m_torr_a_sech + m_torr_humid 
+- m_vert_a_sech + m_bois_a_sech (x12) + m_torr_a_sech <= 150kt
+------------------------------------------
+- (après sechage) 
+  mass_seché = (100-R_bois)m_bois_a_sech/95 (x12) + (100-R_vert)m_vert_a_sech/95 + (100-R_torr)m_torr_a_sech/95 
+
+Modification :
+- benef_torr = vente_torr - achat_torr 				(Pour torr, vert et bois (x12) )
+	= Masse_torr_humid * (PCI_torr_humid * eff * prix_vent) -              (vent du humid)
+	  Masse_torr_humid * prix_achat +                                      (achat total)
+          (100-R_torr)Masse_torr_a_secher/95* (PCI_torr_seché * eff * prix_vent) -      (vent du seché)
+	  Masse_torr_a_secher * prix_achat                                     (achat total)
+- benef = benef_torr + benef_bois (x12) + benef_vert + .....
+- Ajouter le 600k€
+
+
+
+====================================== Dans le code ======================================
+
+# masses en ktons
+MASSE_HUMID / SECHE = {}                                               # index combustible, annee
+MASSE_BOIS_PROVE_HUMID / SECHE = {}                                    # index provenance, annee
+# Variables booléens 
+INCORPORATION_BIOMASSE = {}
+
+for i in range(horizon):
+    for c in combustibles:
+        MASSE[c,i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = dispo[c], name=f'm{c}{i}')
+    for p in bois_prove:
+        MASSE_BOIS_PROVE[p,i] = model.addVar(lb = 0, ub = dispo_bois(p, i), vtype = GRB.CONTINUOUS, name=f'mb{p}{i}')
+    INCORPORATION_BIOMASSE[i] = model.addVar(vtype = GRB.BINARY, name=f'incorp_biomasse{i}')
+
+
+
+
+====================================== brouillon ======================================
+avant sechage
+-------------
+- benef_torr = vente_torr - achat_torr 
+	= Masse_torr * (PCI_torr_humid * eff * prix_vent - prix_achat)
+
+apres sechage
+-------------
+- benef_torr = vente_torr - achat_torr 
+	= Masse_torr_humid * (PCI_torr_humid * eff * prix_vent) +              (vent du humid)
+          Masse_torr_seché * (PCI_torr_seché * eff * prix_vent) -              (vent du seché)
+	  Masse_torr * prix_achat                                              (achat total)
+
+- benef_torr = vente_torr - achat_torr 
+	= Masse_torr_humid * (PCI_torr_humid * eff * prix_vent) -              (vent du humid)
+	  Masse_torr_humid * prix_achat +                                      (achat total)
+          Masse_torr_seché * (PCI_torr_seché * eff * prix_vent) -              (vent du seché)
+	  Masse_torr_a_secher * prix_achat                                     (achat total)
+
+- benef_torr = vente_torr - achat_torr 
+	= Masse_torr_humid * (PCI_torr_humid * eff * prix_vent) -              (vent du humid)
+	  Masse_torr_humid * prix_achat +                                      (achat total)
+          (100-R_torr)Masse_torr_a_secher/95* (PCI_torr_seché * eff * prix_vent) -      (vent du seché)
+	  Masse_torr_a_secher * prix_achat                                     (achat total)
+
+
+
+
+
+PCI_torr_humid >>> humidité 0.05
+PCI_torr_seché >>> humidité 0.00
+
+PCI_torr_bois >>> humidité 0.20
+PCI_torr_bois >>> humidité 0.05
+
+PCI_torr_vert >>> humidité 0.40
+PCI_torr_vert >>> humidité 0.05
+
+
+
+mass_torr >> 
+mass_torr_a_secher + mass_torr_humid >>
+mass_torr_seche + eau + mass_torr_humid >
+
+
+Masse_bois = 100k
+100k = 100p + H
+Rk = 5p + H
+(100-R)k = 95p 	>>>  p = (100-R)/95
+
+M_Seché = 100(p) = 100 * (100-R)/95
+>>> M_Seché = 100 * (100-R)k/95
+>>> M_Seché = (100-R)100 * k/95
+>>> M_Seché = (100-R)Masse_bois/95

@@ -70,11 +70,12 @@ dispositif_sechage = True                       # True si on va utliser le dispo
 # p_achat (euro/ton), humidite, dispo (kt)
 combustibles, p_achat, humid, dispo = multidict({
         'carb': [100*euro/ton,   0,      GRB.INFINITY],
-        'biog': [190*euro/ton,   0,      700*kt],
+        'biog': [190*euro/ton,   0,      700*kt],       # on n'a pas consideré le 5% d'humidité avant broyage 
         'vert': [25*euro/ton,    0.4,    52*kt],
         'bois': [0*euro/ton,     0.2,    GRB.INFINITY],
         'recy': [12*euro/ton,    0.05,   85*kt]
     })
+
 
 # p_achat (euro/t), dispo 1 (kt), dispo 2 (kt), GES (kg), route (km)
 bois_prove, p_achat_bois, dispo_bois_debut, dispo_bois_final, ges_bois, route_bois = multidict({
@@ -172,13 +173,13 @@ for i in range(horizon):
 # Definition des relations et contraintes 
 ###########################################################################
 
-utilite = []
+benef = []
 for i in range(horizon):
-    utilite.append(quicksum((p_vente(c) * pci(c) * efficacite - p_achat[c]) * MASSE[c,i] for c in combustibles)
+    benef.append(quicksum((p_vente(c) * pci(c) * efficacite - p_achat[c]) * MASSE[c,i] for c in combustibles)
                    - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove)
                    - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
 
-objective = quicksum(utilite[i] for i in range(horizon)) - instalation_sechage - duplic_capacite
+objective = quicksum(benef[i] for i in range(horizon)) - instalation_sechage - duplic_capacite
     
 model.setObjective(objective)
 
@@ -213,20 +214,36 @@ for i in (0, horizon-1):
     print(f"masse de combustibles à année {i+1} est :")
     for c in combustibles:
         print(f"{c}: {MASSE[c,i].x:.1f}")
-    print(f"profit pour année {i+1} = {utilite[i].getValue():.2f}")
+    print(f"profit pour année {i+1} = {benef[i].getValue():.2f}")
     ratio = MASSE['carb',i].x / sum(MASSE[c,i].x for c in combustibles)
     print(f"ratio charbon/masse totale à année {i+1} est : {ratio*100:.0f} %")
     
 # Calcul du coefficient des Masses, ceci afin de sav
     for c in combustibles:
         coef_combustible = pci(c)*efficacite*p_vente(c) - p_achat[c] 
-        print(f"{c}: {coef_combustible.x:.1f}")
+        print(f"{c}: {coef_combustible:.1f}")
     
 # 
     for b in bois_prove:
-        coef_combustible = pci(b)*efficacite*p_vente(b) - p_achat_bois[b] 
-        print(f"{b}: {coef_combustible.x:.1f}")
+        coef_combustible = pci('bois')*efficacite*p_vente(b) - p_achat_bois[b] 
+        print(f"{b}: {coef_combustible:.1f}")
         
         
+
+####### Bloc de notes 
+#
+# Avant incorporation du sechage
+# ===========================
+# deux matière avec humidité : bois et le vert
+# bois : 12 fournisseurs
+#
+#
+# Après incorporation du sechage
+# ===========================
+#
+#
+
+
+
 
 

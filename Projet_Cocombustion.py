@@ -70,12 +70,17 @@ dispositif_sechage = True                       # True si on va utliser le dispo
 # p_achat (euro/ton), humidite, dispo (kt)
 combustibles, p_achat, humid, dispo = multidict({
         'carb': [100*euro/ton,   0,      GRB.INFINITY],
+<<<<<<< HEAD
         'biog': [190*euro/ton,   0,      700*kt], #Granulé
+=======
+        'biog': [190*euro/ton,   0,      700*kt],       # on n'a pas consideré le 5% d'humidité avant broyage 
+>>>>>>> a0efae0ea2e6e4431c55628c0062481d7a181709
         'vert': [25*euro/ton,    0.4,    52*kt],
         'bois': [0*euro/ton,     0.2,    GRB.INFINITY],
         'recy': [12*euro/ton,    0.05,   85*kt]
     })
 
+<<<<<<< HEAD
 # differentes masses (Variables), es contraintes de séchages ou non
 combust_sech_humid, dispo_sech_humid = multidict({
         'vert_a_sech': [GRB.INFINITY],
@@ -101,6 +106,23 @@ bois_prove, p_achat_bois, dispo_bois_debut, dispo_bois_final, ges_bois, route_bo
 '200':	[116*euro/ton,   27*kt,  27*kt,	  0.03,	 200,  GRB.INFINITY],
 '300':	[156*euro/ton,   56*kt,  56*kt,	  0.05,	 300,  GRB.INFINITY],
 '400':	[196*euro/ton,   93*kt,  93*kt,	  0.07,	 400,  GRB.INFINITY],
+=======
+
+# p_achat (euro/t), dispo 1 (kt), dispo 2 (kt), GES (kg), route (km)
+bois_prove, p_achat_bois, dispo_bois_debut, dispo_bois_final, ges_bois, route_bois = multidict({
+'30A':	[128*euro/ton,   18*kt,  21*kt,	  0.04,	 230],
+'30C':	[120*euro/ton,   21*kt,  43*kt,	  0.03,	 210],
+'48':	[128*euro/ton,   12*kt,  75*kt,	  0.04,	 230],
+'07':	[116*euro/ton,   8*kt,   56*kt,	  0.03,	 200],
+'13':	[44*euro/ton,	 47*kt,  51*kt,   0.00,	 20],
+'84':	[76*euro/ton,	 24*kt,  28*kt,   0.02,	 100],
+'83':	[60*euro/ton,	 27*kt,  27*kt,   0.01,	 60],
+'05':	[100*euro/ton,   15*kt,  21*kt,	  0.03,	 160],
+'04':	[88*euro/ton,	 26*kt,  37*kt,   0.02,	 130],
+'200':	[116*euro/ton,   27*kt,  27*kt,	  0.03,	 200],
+'300':	[156*euro/ton,   56*kt,  56*kt,	  0.05,	 300],
+'400':	[196*euro/ton,   93*kt,  93*kt,	  0.07,	 400]
+>>>>>>> a0efae0ea2e6e4431c55628c0062481d7a181709
 })
 
 ###########################################################################
@@ -211,13 +233,13 @@ for i in range(horizon):
 # Definition des relations et contraintes 
 ###########################################################################
 
-utilite = []
+benef = []
 for i in range(horizon):
-    utilite.append(quicksum((p_vente(c) * pci(c) * efficacite - p_achat[c]) * MASSE[c,i] for c in combustibles)
+    benef.append(quicksum((p_vente(c) * pci(c) * efficacite - p_achat[c]) * MASSE[c,i] for c in combustibles)
                    - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove)
                    - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
 
-objective = quicksum(utilite[i] for i in range(horizon)) - instalation_sechage - duplic_capacite
+objective = quicksum(benef[i] for i in range(horizon)) - instalation_sechage - duplic_capacite
     
 model.setObjective(objective)
 
@@ -252,7 +274,7 @@ for i in (0, horizon-1):
     print(f"masse de combustibles à année {i+1} est :")
     for c in combustibles:
         print(f"{c}: {MASSE[c,i].x:.1f}")
-    print(f"profit pour année {i+1} = {utilite[i].getValue():.2f}")
+    print(f"profit pour année {i+1} = {benef[i].getValue():.2f}")
     ratio = MASSE['carb',i].x / sum(MASSE[c,i].x for c in combustibles)
     print(f"ratio charbon/masse totale à année {i+1} est : {ratio*100:.0f} %")
     
@@ -267,5 +289,21 @@ for i in (0, horizon-1):
         print(f"{b}: {coef_combustible:.1f}")
         
         
+
+####### Bloc de notes 
+#
+# Avant incorporation du sechage
+# ===========================
+# deux matière avec humidité : bois et le vert
+# bois : 12 fournisseurs
+#
+#
+# Après incorporation du sechage
+# ===========================
+#
+#
+
+
+
 
 

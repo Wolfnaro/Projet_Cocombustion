@@ -70,26 +70,37 @@ dispositif_sechage = True                       # True si on va utliser le dispo
 # p_achat (euro/ton), humidite, dispo (kt)
 combustibles, p_achat, humid, dispo = multidict({
         'carb': [100*euro/ton,   0,      GRB.INFINITY],
-        'biog': [190*euro/ton,   0,      700*kt],
+        'biog': [190*euro/ton,   0,      700*kt], #Granulé
         'vert': [25*euro/ton,    0.4,    52*kt],
         'bois': [0*euro/ton,     0.2,    GRB.INFINITY],
         'recy': [12*euro/ton,    0.05,   85*kt]
     })
 
-# p_achat (euro/t), dispo 1 (kt), dispo 2 (kt), GES (kg), route (km)
-bois_prove, p_achat_bois, dispo_bois_debut, dispo_bois_final, ges_bois, route_bois = multidict({
-'30A':	[128*euro/ton,   18*kt,  21*kt,	  0.04,	 230],
-'30C':	[120*euro/ton,   21*kt,  43*kt,	  0.03,	 210],
-'48':	[128*euro/ton,   12*kt,  75*kt,	  0.04,	 230],
-'07':	[116*euro/ton,   8*kt,   56*kt,	  0.03,	 200],
-'13':	[44*euro/ton,	 47*kt,  51*kt,   0.00,	 20],
-'84':	[76*euro/ton,	 24*kt,  28*kt,   0.02,	 100],
-'83':	[60*euro/ton,	 27*kt,  27*kt,   0.01,	 60],
-'05':	[100*euro/ton,   15*kt,  21*kt,	  0.03,	 160],
-'04':	[88*euro/ton,	 26*kt,  37*kt,   0.02,	 130],
-'200':	[116*euro/ton,   27*kt,  27*kt,	  0.03,	 200],
-'300':	[156*euro/ton,   56*kt,  56*kt,	  0.05,	 300],
-'400':	[196*euro/ton,   93*kt,  93*kt,	  0.07,	 400]
+# differentes masses (Variables), es contraintes de séchages ou non
+combust_sech_humid, dispo_sech_humid = multidict({
+        'vert_a_sech': [GRB.INFINITY],
+        'torr_a_sech': [GRB.INFINITY],
+        'torr_humid':  [GRB.INFINITY],
+        'seché':       [GRB.INFINITY],
+    })
+
+
+
+
+# p_achat (euro/t), dispo 1 (kt), dispo 2 (kt), GES (kg), route (km), dispo bois pour contraintes de séchages
+bois_prove, p_achat_bois, dispo_bois_debut, dispo_bois_final, ges_bois, route_bois, dispo_bois_sh = multidict({
+'30A':	[128*euro/ton,   18*kt,  21*kt,	  0.04,	 230,  GRB.INFINITY],
+'30C':	[120*euro/ton,   21*kt,  43*kt,	  0.03,	 210,  GRB.INFINITY],
+'48':	[128*euro/ton,   12*kt,  75*kt,	  0.04,	 230,  GRB.INFINITY],
+'07':	[116*euro/ton,   8*kt,   56*kt,	  0.03,	 200,  GRB.INFINITY],
+'13':	[44*euro/ton,	 47*kt,  51*kt,   0.00,	 20,   GRB.INFINITY],
+'84':	[76*euro/ton,	 24*kt,  28*kt,   0.02,	 100,  GRB.INFINITY],
+'83':	[60*euro/ton,	 27*kt,  27*kt,   0.01,	 60,   GRB.INFINITY],
+'05':	[100*euro/ton,   15*kt,  21*kt,	  0.03,	 160,  GRB.INFINITY],
+'04':	[88*euro/ton,	 26*kt,  37*kt,   0.02,	 130,  GRB.INFINITY],
+'200':	[116*euro/ton,   27*kt,  27*kt,	  0.03,	 200,  GRB.INFINITY],
+'300':	[156*euro/ton,   56*kt,  56*kt,	  0.05,	 300,  GRB.INFINITY],
+'400':	[196*euro/ton,   93*kt,  93*kt,	  0.07,	 400,  GRB.INFINITY],
 })
 
 ###########################################################################
@@ -157,15 +168,43 @@ model.modelSense = GRB.MAXIMIZE
 
 # masses en ktons
 MASSE = {}                                               # index combustible, annee
+MASSE_SECH_HUMID = {}                                    # Index combustible_sech-humid, année
 MASSE_BOIS_PROVE = {}                                    # index provenance, annee
 # Variables booléens 
 INCORPORATION_BIOMASSE = {}
 
+
+
+#m_vert_a_sech = {}
+#m_vert_humid = {}
+#m_torr_a_sech = {}
+#m_torr_humid = {}
+#mass_seché = {}
+
+m_bois_a_sech = {}  (x12)
+m_bois_humid = {}  (x12)
+
 for i in range(horizon):
     for c in combustibles:
         MASSE[c,i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = dispo[c], name=f'm{c}{i}')
+        
+#Ajouté, wilfried
+    for s in combustibles:
+        MASSE_SECH_HUMID[s,i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = dispo_sech_humid[s], name=f'm{s}{i}')
+        
+        
+#       m_vert_a_sech[i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = GRB.INFINITY, name=f'm{'vert_a_sech'}{i}')
+#       m_vert_humid[i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = GRB.INFINITY, name=f'm{'vert_humid'}{i}')
+#       m_torr_a_sech[i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = GRB.INFINITY, name=f'm{'torr_a_sech'}{i}')
+#       m_torr_humid[i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = GRB.INFINITY, name=f'm{'torr_humid'}{i}')
+#       mass_seché[i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = GRB.INFINITY, name=f'm{'seché'}{i}')
     for p in bois_prove:
         MASSE_BOIS_PROVE[p,i] = model.addVar(lb = 0, ub = dispo_bois(p, i), vtype = GRB.CONTINUOUS, name=f'mb{p}{i}')
+
+#Ajouté, wilfried
+        m_bois_a_sech[p,i] = model.addVar(lb = 0, ub = dispo_bois_sh(p, i), vtype = GRB.CONTINUOUS, name=f'mb{p}{i}')
+        m_bois_humid[p,i] = model.addVar(lb = 0, ub = dispo_bois_sh(p, i), vtype = GRB.CONTINUOUS, name=f'mb{p}{i}')
+
     INCORPORATION_BIOMASSE[i] = model.addVar(vtype = GRB.BINARY, name=f'incorp_biomasse{i}')
 
 ###########################################################################
@@ -220,12 +259,12 @@ for i in (0, horizon-1):
 # Calcul du coefficient des Masses, ceci afin de sav
     for c in combustibles:
         coef_combustible = pci(c)*efficacite*p_vente(c) - p_achat[c] 
-        print(f"{c}: {coef_combustible.x:.1f}")
+        print(f"{c}: {coef_combustible:.1f}")
     
 # 
     for b in bois_prove:
-        coef_combustible = pci(b)*efficacite*p_vente(b) - p_achat_bois[b] 
-        print(f"{b}: {coef_combustible.x:.1f}")
+        coef_combustible = pci('bois')*efficacite*p_vente(b) - p_achat_bois[b] 
+        print(f"{b}: {coef_combustible:.1f}")
         
         
 

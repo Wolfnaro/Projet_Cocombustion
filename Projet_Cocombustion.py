@@ -68,45 +68,36 @@ cout_incorp_1 = 430 * euro/terajoule
 dispositif_sechage = True                       # True si on va utliser le dispositive de sechage
 
 # p_achat (euro/ton), humidite, dispo (kt)
-combustibles, p_achat, humid, dispo = multidict({
-        'carb': [100*euro/ton,   0,      GRB.INFINITY],
-<<<<<<< HEAD
-        'biog': [190*euro/ton,   0,      700*kt], #Granulé
-=======
-        'biog': [190*euro/ton,   0,      700*kt],       # on n'a pas consideré le 5% d'humidité avant broyage 
->>>>>>> a0efae0ea2e6e4431c55628c0062481d7a181709
-        'vert': [25*euro/ton,    0.4,    52*kt],
-        'bois': [0*euro/ton,     0.2,    GRB.INFINITY],
-        'recy': [12*euro/ton,    0.05,   85*kt]
+combustibles, p_achat,          humid,  humid_sech, dispo = multidict({
+        'carb': [100*euro/ton,   0,     0,       GRB.INFINITY],
+        'biog': [190*euro/ton,   0,     0,       700*kt],       #Granulé # on n'a pas consideré le 5% d'humidité avant broyage 
+        'vert': [25*euro/ton,    0.4,   0.05,    52*kt],
+        'bois': [0*euro/ton,     0.2,   0.05,    GRB.INFINITY],
+        'recy': [12*euro/ton,    0.05,  0.05 ,   85*kt]
     })
 
-<<<<<<< HEAD
-# differentes masses (Variables), es contraintes de séchages ou non
-combust_sech_humid, dispo_sech_humid = multidict({
-        'vert_a_sech': [GRB.INFINITY],
-        'torr_a_sech': [GRB.INFINITY],
-        'torr_humid':  [GRB.INFINITY],
-        'seché':       [GRB.INFINITY],
-    })
+# # differentes masses (Variables), es contraintes de séchages ou non
+# combust_sech_humid, dispo_sech_humid = multidict({
+#         'vert_a_sech': [GRB.INFINITY],
+#         'torr_a_sech': [GRB.INFINITY],
+#         'torr_humid':  [GRB.INFINITY],
+#         'seché':       [GRB.INFINITY],
+#     })
 
-
-
-
-# p_achat (euro/t), dispo 1 (kt), dispo 2 (kt), GES (kg), route (km), dispo bois pour contraintes de séchages
-bois_prove, p_achat_bois, dispo_bois_debut, dispo_bois_final, ges_bois, route_bois, dispo_bois_sh = multidict({
-'30A':	[128*euro/ton,   18*kt,  21*kt,	  0.04,	 230,  GRB.INFINITY],
-'30C':	[120*euro/ton,   21*kt,  43*kt,	  0.03,	 210,  GRB.INFINITY],
-'48':	[128*euro/ton,   12*kt,  75*kt,	  0.04,	 230,  GRB.INFINITY],
-'07':	[116*euro/ton,   8*kt,   56*kt,	  0.03,	 200,  GRB.INFINITY],
-'13':	[44*euro/ton,	 47*kt,  51*kt,   0.00,	 20,   GRB.INFINITY],
-'84':	[76*euro/ton,	 24*kt,  28*kt,   0.02,	 100,  GRB.INFINITY],
-'83':	[60*euro/ton,	 27*kt,  27*kt,   0.01,	 60,   GRB.INFINITY],
-'05':	[100*euro/ton,   15*kt,  21*kt,	  0.03,	 160,  GRB.INFINITY],
-'04':	[88*euro/ton,	 26*kt,  37*kt,   0.02,	 130,  GRB.INFINITY],
-'200':	[116*euro/ton,   27*kt,  27*kt,	  0.03,	 200,  GRB.INFINITY],
-'300':	[156*euro/ton,   56*kt,  56*kt,	  0.05,	 300,  GRB.INFINITY],
-'400':	[196*euro/ton,   93*kt,  93*kt,	  0.07,	 400,  GRB.INFINITY],
-=======
+# # p_achat (euro/t), dispo 1 (kt), dispo 2 (kt), GES (kg), route (km), dispo bois pour contraintes de séchages
+# bois_prove, p_achat_bois, dispo_bois_debut, dispo_bois_final, ges_bois, route_bois, dispo_bois_sh = multidict({
+# '30A':	[128*euro/ton,   18*kt,  21*kt,	  0.04,	 230,  GRB.INFINITY],
+# '30C':	[120*euro/ton,   21*kt,  43*kt,	  0.03,	 210,  GRB.INFINITY],
+# '48':	[128*euro/ton,   12*kt,  75*kt,	  0.04,	 230,  GRB.INFINITY],
+# '07':	[116*euro/ton,   8*kt,   56*kt,	  0.03,	 200,  GRB.INFINITY],
+# '13':	[44*euro/ton,	 47*kt,  51*kt,   0.00,	 20,   GRB.INFINITY],
+# '84':	[76*euro/ton,	 24*kt,  28*kt,   0.02,	 100,  GRB.INFINITY],
+# '83':	[60*euro/ton,	 27*kt,  27*kt,   0.01,	 60,   GRB.INFINITY],
+# '05':	[100*euro/ton,   15*kt,  21*kt,	  0.03,	 160,  GRB.INFINITY],
+# '04':	[88*euro/ton,	 26*kt,  37*kt,   0.02,	 130,  GRB.INFINITY],
+# '200':	[116*euro/ton,   27*kt,  27*kt,	  0.03,	 200,  GRB.INFINITY],
+# '300':	[156*euro/ton,   56*kt,  56*kt,	  0.05,	 300,  GRB.INFINITY],
+# '400':	[196*euro/ton,   93*kt,  93*kt,	  0.07,	 400,  GRB.INFINITY],
 
 # p_achat (euro/t), dispo 1 (kt), dispo 2 (kt), GES (kg), route (km)
 bois_prove, p_achat_bois, dispo_bois_debut, dispo_bois_final, ges_bois, route_bois = multidict({
@@ -122,7 +113,6 @@ bois_prove, p_achat_bois, dispo_bois_debut, dispo_bois_final, ges_bois, route_bo
 '200':	[116*euro/ton,   27*kt,  27*kt,	  0.03,	 200],
 '300':	[156*euro/ton,   56*kt,  56*kt,	  0.05,	 300],
 '400':	[196*euro/ton,   93*kt,  93*kt,	  0.07,	 400]
->>>>>>> a0efae0ea2e6e4431c55628c0062481d7a181709
 })
 
 ###########################################################################
@@ -162,11 +152,14 @@ residus_vert, dispo_vert, p_achat_vert, route_vert, morceau = multidict({
 ###########################################################################
 #GJ/t
 def pci_from_humidity(humidity):
-    return 18 - 21 * humidity
+    return 18 - 21 * humidity                   #Pour le torrifie soit on a 5% soit on a 18Gj après sechage. Mais après sechage toute la biomasse aura 5% >>> contradiction ?
 
 # PCI en MWh/ton
-def pci(combustible):
-    pcigj = 25 if combustible=='carb' else pci_from_humidity(humid[combustible])
+def pci(combustible,sechage):
+    if(sechage == False): valeur_hum = humid[combustible]
+    else: valeur_hum = humid_sech[combustible]
+    
+    pcigj = 25 if combustible=='carb' else pci_from_humidity(valeur_hum)
     return pcigj/(3.6 * ton)
 
 # prix unitaire en euro/MWh
@@ -176,6 +169,9 @@ def p_vente(combustible):
 # dispo en kton
 def dispo_bois(prove, annee):
     return dispo_bois_debut[prove] if annee <= 10 else dispo_bois_final[prove]
+
+def coefficient(matiere, sechage):
+    return (100-humid['biog'])/95 if sechage == 'humid' else 1 
 
 ###########################################################################
 # Modelisation 
@@ -190,29 +186,30 @@ model.modelSense = GRB.MAXIMIZE
 
 # masses en ktons
 MASSE = {}                                               # index combustible, annee
-MASSE_SECH_HUMID = {}                                    # Index combustible_sech-humid, année
 MASSE_BOIS_PROVE = {}                                    # index provenance, annee
+
+MASSE_HUMID = {}                                    # Index combustible_sech-humid, année  >>> MASSE
+MASSE_A_SECHER ={}
+MASSE_SECHE = {}                 # Masse seché!!!
+
 # Variables booléens 
 INCORPORATION_BIOMASSE = {}
 
+# m_bois_humid = {}  (x12)
+# m_bois_a_sech = {}  (x12)
 
-
-#m_vert_a_sech = {}
-#m_vert_humid = {}
-#m_torr_a_sech = {}
-#m_torr_humid = {}
-#mass_seché = {}
-
-m_bois_a_sech = {}  (x12)
-m_bois_humid = {}  (x12)
+#matiere_humid = ['vert', 'biog', 'bois']
+matiere_humid = ['vert', 'biog']
+pas_besoin_secher = ['carb', 'bois', 'recy']
 
 for i in range(horizon):
     for c in combustibles:
         MASSE[c,i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = dispo[c], name=f'm{c}{i}')
         
 #Ajouté, wilfried
-    for s in combustibles:
-        MASSE_SECH_HUMID[s,i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = dispo_sech_humid[s], name=f'm{s}{i}')
+    for s in matiere_humid:
+        MASSE_HUMID[s,i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, name=f'masse_humid{s}{i}')
+        MASSE_A_SECHER[s,i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, name=f'masse_a_secher{s}{i}')
         
         
 #       m_vert_a_sech[i] = model.addVar(lb = 0, vtype = GRB.CONTINUOUS, ub = GRB.INFINITY, name=f'm{'vert_a_sech'}{i}')
@@ -223,9 +220,9 @@ for i in range(horizon):
     for p in bois_prove:
         MASSE_BOIS_PROVE[p,i] = model.addVar(lb = 0, ub = dispo_bois(p, i), vtype = GRB.CONTINUOUS, name=f'mb{p}{i}')
 
-#Ajouté, wilfried
-        m_bois_a_sech[p,i] = model.addVar(lb = 0, ub = dispo_bois_sh(p, i), vtype = GRB.CONTINUOUS, name=f'mb{p}{i}')
-        m_bois_humid[p,i] = model.addVar(lb = 0, ub = dispo_bois_sh(p, i), vtype = GRB.CONTINUOUS, name=f'mb{p}{i}')
+# #Ajouté, wilfried
+#         m_bois_a_sech[p,i] = model.addVar(lb = 0, ub = dispo_bois_sh(p, i), vtype = GRB.CONTINUOUS, name=f'mb{p}{i}')
+#         m_bois_humid[p,i] = model.addVar(lb = 0, ub = dispo_bois_sh(p, i), vtype = GRB.CONTINUOUS, name=f'mb{p}{i}')
 
     INCORPORATION_BIOMASSE[i] = model.addVar(vtype = GRB.BINARY, name=f'incorp_biomasse{i}')
 
@@ -235,9 +232,23 @@ for i in range(horizon):
 
 benef = []
 for i in range(horizon):
-    benef.append(quicksum((p_vente(c) * pci(c) * efficacite - p_achat[c]) * MASSE[c,i] for c in combustibles)
-                   - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove)
-                   - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
+    benef.append(quicksum((p_vente(c) * pci(c,False) * efficacite - p_achat[c]) * MASSE[c,i] for c in pas_besoin_secher)
+                 + quicksum(coefficient(c,False) * MASSE_HUMID[c,i] * pci(c,False) * efficacite * p_vente(c) for c in matiere_humid)                       # (vent humid total)
+                 + quicksum(coefficient(c,True) * MASSE_A_SECHER[c,i] * (pci(c,True)  * efficacite * p_vente(c)) for c in matiere_humid)    # (vent du seché)
+                 - quicksum(MASSE[c,i] * p_achat[c] for c in combustibles)                                                   # (achat total)
+# --------------------------------------------------
+#     MASSE_HUMID['vert',i] * pci('vert') * efficacite * p_vente('vert') -                       # (vent humid total)
+# #>>>    MASSE_HUMID['biog',i] * prix_achat +                                                    # (achat humid total)
+#     (100-humid['biog'])/95 * MASSE_A_SECHER['biog',i] * (pci('vert')!!!!!  * efficacite * p_vente('biog')) -    # (vent du seché)
+
+# #>>>    MASSE_A_SECHER['biog',i] * prix_achat                                                   # (achat total)
+#     - MASSE['biog',i] * prix_achat                                                   # (achat total)
+                - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove) 
+                - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
+
+    # benef.append(quicksum((p_vente(c) * pci(c) * efficacite - p_achat[c]) * MASSE[c,i] for c in combustibles)
+    #                - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove)
+    #                - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
 
 objective = quicksum(benef[i] for i in range(horizon)) - instalation_sechage - duplic_capacite
     
@@ -251,20 +262,25 @@ CONTR_CARB  = []     # 0.9m_c(t) - 0.1 * SUM_1(m_i(t)) >= 0
 CONTR_PROD  = []     # (m_c(t) * PCI_c + SUM_1(m_i(t) * PCI_i)) = Energie Brute = Energie Produit / efficacite
 CONTR_STOCK = []     # m_b + m_v + m_r <= 1500 * 365
 CONTR_BOIS  = []     # m_b = SUM_2(m_bj(t))
-#CONTR_SECH  = []     # Capacité maximale de séchage : 150 kt (H8)
 CONTR_COUT_INCORPO = []
+CONTR_A_SECHER  = []     # masse = masse_a_sech + masse_humid 
 
-masse_max_charbon = energ_brut / pci('carb')
+masse_max_charbon = energ_brut / pci('carb',False)
 
 for i in range(horizon):
     biomasse = quicksum(MASSE[c,i] for c in combustibles if c != 'carb')
     CONTR_CARB.append(model.addConstr((1 - porcentage_carbon) * MASSE['carb', i] >= porcentage_carbon * biomasse))
-    CONTR_PROD.append(model.addConstr(quicksum(MASSE[c, i] * pci(c) for c in combustibles) == energ_brut))
+    CONTR_PROD.append(model.addConstr(quicksum(MASSE[c, i] * pci(c,False) for c in pas_besoin_secher)
+                                      + quicksum(MASSE_HUMID[c, i] * pci(c,False) + MASSE_A_SECHER[c, i] * coefficient(c, True) * pci(c, True) for c in matiere_humid)))
+#    CONTR_PROD.append(model.addConstr(quicksum(MASSE[c, i] * pci(c) for c in combustibles) == energ_brut))
     biomasse_brute = quicksum(MASSE[c,i] for c in ['vert', 'recy', 'bois'])
     CONTR_STOCK.append(model.addConstr(biomasse_brute <= 365 * capacite_jour))
     CONTR_BOIS.append(model.addConstr(MASSE['bois', i] ==  quicksum(MASSE_BOIS_PROVE[p,i] for p in bois_prove)))
-#    CONTR_SECH.append(model.addConstr(biomasse_brute <= capacite_sechage))
     CONTR_COUT_INCORPO.append(model.addConstr(biomasse >= MASSE['carb', i] - masse_max_charbon * (1 - INCORPORATION_BIOMASSE[i])))
+    CONTR_A_SECHER.append(model.addConstr(quicksum(MASSE_A_SECHER[p,i] for p in matiere_humid) <= 150*kt))
+    for j in matiere_humid:
+        CONTR_A_SECHER.append(model.addConstr(MASSE[j,i] == MASSE_HUMID[j,i] + MASSE_A_SECHER[j,i]))
+
 model.write('new.lp')
 model.optimize()
 assert model.status == GRB.status.OPTIMAL, f"solver stopped with status {M.status}"
@@ -278,15 +294,15 @@ for i in (0, horizon-1):
     ratio = MASSE['carb',i].x / sum(MASSE[c,i].x for c in combustibles)
     print(f"ratio charbon/masse totale à année {i+1} est : {ratio*100:.0f} %")
     
-# Calcul du coefficient des Masses, ceci afin de sav
-    for c in combustibles:
-        coef_combustible = pci(c)*efficacite*p_vente(c) - p_achat[c] 
-        print(f"{c}: {coef_combustible:.1f}")
+# # Calcul du coefficient des Masses, ceci afin de sav
+#     for c in combustibles:
+#         coef_combustible = pci(c)*efficacite*p_vente(c) - p_achat[c] 
+#         print(f"{c}: {coef_combustible:.1f}")
     
-# 
-    for b in bois_prove:
-        coef_combustible = pci('bois')*efficacite*p_vente(b) - p_achat_bois[b] 
-        print(f"{b}: {coef_combustible:.1f}")
+# # 
+#     for b in bois_prove:
+#         coef_combustible = pci('bois')*efficacite*p_vente(b) - p_achat_bois[b] 
+#         print(f"{b}: {coef_combustible:.1f}")
         
         
 

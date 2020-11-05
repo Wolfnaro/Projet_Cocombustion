@@ -4,33 +4,39 @@ Anciens variables :
 - mass_torr
 
 Nouvelles variables :
-- m_vert_a_sech 
-- m_vert_humid 
-- m_bois_a_sech   (x12)
-- m_bois_humid   (x12)
-- m_torr_a_sech 
-- m_torr_humid 
-- mass_seché 
+(FAIT)- m_vert_a_sech 
+- m_bois_a_sech   (x12)   #LE FAIRE APRES
+(FAIT)- m_torr_a_sech 
+
+(FAIT)- m_vert_humid 
+- m_bois_humid   (x12)    #LE FAIRE APRES
+(FAIT)- m_torr_humid 
+(FAIT)#########- mass_seché 
 
 Conditions : 
-- mass_vert = m_vert_a_sech + m_vert_humid 
+(FAIT)- mass_vert = m_vert_a_sech + m_vert_humid 
+(FAIT)- mass_torr = m_torr_a_sech + m_torr_humid 
 - mass_bois = m_bois_a_sech + m_bois_humid   (x12)
-- mass_torr = m_torr_a_sech + m_torr_humid 
-- m_vert_a_sech + m_bois_a_sech (x12) + m_torr_a_sech <= 150kt
-------------------------------------------
-- (après sechage) 
-  mass_seché = (100-R_bois)m_bois_a_sech/95 (x12) + (100-R_vert)m_vert_a_sech/95 + (100-R_torr)m_torr_a_sech/95 
 
+- m_vert_a_sech + m_bois_a_sech (x12) + m_torr_a_sech <= 150kt
+>>>(FAIT)- m_vert_a_sech + m_torr_a_sech <= 150kt
+
+------------------------------------------
 Modification :
 - benef_torr = vente_torr - achat_torr 				(Pour torr, vert et bois (x12) )
 	= Masse_torr_humid * (PCI_torr_humid * eff * prix_vent) -              (vent du humid)
-	  Masse_torr_humid * prix_achat +                                      (achat total)
+###>	  Masse_torr_humid * prix_achat +                                      (achat total)
           (100-R_torr)Masse_torr_a_secher/95* (PCI_torr_seché * eff * prix_vent) -      (vent du seché)
-	  Masse_torr_a_secher * prix_achat                                     (achat total)
+###>	  Masse_torr_a_secher * prix_achat                                     (achat total)
+
+>>>	  - Masse_torr * prix_achat                                     (achat total)
+
 - benef = benef_torr + benef_bois (x12) + benef_vert + .....
 - Ajouter le 600k€
 
 
+- (après sechage) 
+  mass_seché = (100-R_bois)m_bois_a_sech/95 (x12) + (100-R_vert)m_vert_a_sech/95 + (100-R_torr)m_torr_a_sech/95 
 
 ====================================== Dans le code ======================================
 
@@ -95,12 +101,14 @@ mass_torr_a_secher + mass_torr_humid >>
 mass_torr_seche + eau + mass_torr_humid >
 
 
-Masse_bois = 100k
+Masse_bois_à_seché = 100k
 100k = 100p + H
 Rk = 5p + H
-(100-R)k = 95p 	>>>  p = (100-R)/95
+(100-R)k = 95p 	>>>  p = (100-R)k/95
 
-M_Seché = 100(p) = 100 * (100-R)/95
+M_Seché = 100(p) = 100 * (100-R)k/95
 >>> M_Seché = 100 * (100-R)k/95
 >>> M_Seché = (100-R)100 * k/95
->>> M_Seché = (100-R)Masse_bois/95
+>>> M_Seché = (100-R)Masse_bois_à_secher/95
+>>> M_Seché = (100-R)/95 Masse_bois_à_secher
+>>> M_Seché = coeff_reduction * Masse_bois_à_secher

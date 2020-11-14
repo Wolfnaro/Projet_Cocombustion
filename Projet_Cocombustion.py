@@ -13,20 +13,16 @@ Faudra remplir dans un txt les valeurs :
     - Prix de vente chaque materiau
 """
 ###########################################################################
-# Cette version et la suivante de la corrigé par la profe sauf qu'on a corrigé
-# les problèmes de unites et on a ajouté la hipotese H8
-# Si on ajoute cette hipotese on obtient 0 de vert. On peut dire qu'il est
-# moins priorité que quelques recy (Regarder les deux lignes CONTR_SECH)
-# Aussi ici on a fait avec puissance_nominale = 250, tant que la prof a changé
-# par 150
+# Fait
+# - 
+# - On a ajouté le cout d'incorporation
+# - On a implementé le dispositif de séchage
 #
-# Hemos agregado el costo de incorporacion. Las lineas que intervienen son 
-# la ultima linea de la utilidad, la linea de definicion de la contrante de 
-# de incorporacion y la linea de la contrainte.
-#
-# Consejo : intentar hacer el calculo unicamente con carbono y ver cuanto deberia salir
-# segun el sujet habia una ganancia que miles de euros y no en millards (quizas es exagerado el monto)
-# revisa cuanto sale solo tomando carbono.
+# Reste à faire
+# - Fonction pour morceau de residus vert
+# - Achat des emission de CO2
+# - Alimenter le dispositif de séchage
+# - Implementation broyar
 ###########################################################################
 from gurobipy import *
 import numpy as np
@@ -53,11 +49,16 @@ prod_moyenne = 7500                             # Heures
 efficacite = 0.38
 annee_debut = 2016 # Je n'ai pas encorporé celle-ci. Il faudra l'ajouter après
 porcentage_carbon = 0.1                         # Ratio entre Carbon et Biomasse
-instalation_sechage = 0*euro                   # €
-duplic_capacite = 500000*euro                  # €
+
+duplic_capacite = False                  # €
+cout_duplic_capacite = 500000*euro                  # €
 capacite_jour = 1500 * ton                      # t/jour
+
+dispositif_sechage = True                       # True si on va utliser le dispositive de sechage
+quantite_dispositives_sechage = 1
 instalation_sechage = 600000*euro              # €
 capacite_sechage = 150*kt                       # kt/an
+
 energ_prod = puissance_nominale * prod_moyenne  # MWh
 energ_brut = energ_prod / efficacite            # MWh
 horizon = 20
@@ -65,7 +66,6 @@ horizon = 20
 cout_incorp_0 = 215 * euro/terajoule
 cout_incorp_1 = 430 * euro/terajoule
 
-dispositif_sechage = True                       # True si on va utliser le dispositive de sechage
 
 # p_achat (euro/ton), humidite, dispo (kt)
 combustibles, p_achat,          humid,  humid_sech, dispo = multidict({
@@ -171,7 +171,7 @@ def dispo_bois(prove, annee):
     return dispo_bois_debut[prove] if annee <= 10 else dispo_bois_final[prove]
 
 def coefficient(matiere, sechage):
-    return (100-humid['biog'])/95 if sechage == 'humid' else 1 
+    return (100-humid['biog'])/95 if sechage == True else 1.0 
 
 ###########################################################################
 # Modelisation 
@@ -232,25 +232,19 @@ for i in range(horizon):
 
 benef = []
 for i in range(horizon):
-    benef.append(quicksum((p_vente(c) * pci(c,False) * efficacite - p_achat[c]) * MASSE[c,i] for c in pas_besoin_secher)
-                 + quicksum(coefficient(c,False) * MASSE_HUMID[c,i] * pci(c,False) * efficacite * p_vente(c) for c in matiere_humid)                       # (vent humid total)
-                 + quicksum(coefficient(c,True) * MASSE_A_SECHER[c,i] * (pci(c,True)  * efficacite * p_vente(c)) for c in matiere_humid)    # (vent du seché)
-                 - quicksum(MASSE[c,i] * p_achat[c] for c in combustibles)                                                   # (achat total)
-# --------------------------------------------------
-#     MASSE_HUMID['vert',i] * pci('vert') * efficacite * p_vente('vert') -                       # (vent humid total)
-# #>>>    MASSE_HUMID['biog',i] * prix_achat +                                                    # (achat humid total)
-#     (100-humid['biog'])/95 * MASSE_A_SECHER['biog',i] * (pci('vert')!!!!!  * efficacite * p_vente('biog')) -    # (vent du seché)
+    if dispositif_sechage :
+        benef.append(quicksum((p_vente(c) * pci(c,False) * efficacite - p_achat[c]) * MASSE[c,i] for c in pas_besoin_secher)
+                     + quicksum(coefficient(c,False) * MASSE_HUMID[c,i] * pci(c,False) * efficacite * p_vente(c) for c in matiere_humid)                       # (vent humid total)
+                     + quicksum(coefficient(c,True) * MASSE_A_SECHER[c,i] * (pci(c,True)  * efficacite * p_vente(c)) for c in matiere_humid)    # (vent du seché)
+                     - quicksum(MASSE[c,i] * p_achat[c] for c in matiere_humid)                                                   # (achat total)
+                     - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove) 
+                     - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
+    else:
+        benef.append(quicksum((p_vente(c) * pci(c,False) * efficacite - p_achat[c]) * MASSE[c,i] for c in combustibles)
+                     - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove)
+                     - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
 
-# #>>>    MASSE_A_SECHER['biog',i] * prix_achat                                                   # (achat total)
-#     - MASSE['biog',i] * prix_achat                                                   # (achat total)
-                - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove) 
-                - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
-
-    # benef.append(quicksum((p_vente(c) * pci(c) * efficacite - p_achat[c]) * MASSE[c,i] for c in combustibles)
-    #                - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove)
-    #                - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
-
-objective = quicksum(benef[i] for i in range(horizon)) - instalation_sechage - duplic_capacite
+objective = quicksum(benef[i] for i in range(horizon)) - dispositif_sechage * quantite_dispositives_sechage * instalation_sechage - duplic_capacite * cout_duplic_capacite
     
 model.setObjective(objective)
 
@@ -270,16 +264,19 @@ masse_max_charbon = energ_brut / pci('carb',False)
 for i in range(horizon):
     biomasse = quicksum(MASSE[c,i] for c in combustibles if c != 'carb')
     CONTR_CARB.append(model.addConstr((1 - porcentage_carbon) * MASSE['carb', i] >= porcentage_carbon * biomasse))
-    CONTR_PROD.append(model.addConstr(quicksum(MASSE[c, i] * pci(c,False) for c in pas_besoin_secher)
-                                      + quicksum(MASSE_HUMID[c, i] * pci(c,False) + MASSE_A_SECHER[c, i] * coefficient(c, True) * pci(c, True) for c in matiere_humid)))
-#    CONTR_PROD.append(model.addConstr(quicksum(MASSE[c, i] * pci(c) for c in combustibles) == energ_brut))
+    if dispositif_sechage:
+        CONTR_PROD.append(model.addConstr(quicksum(MASSE[c, i] * pci(c,False) for c in pas_besoin_secher) + 
+                                          quicksum(pci(c,False) * MASSE_HUMID[c, i] + 
+                                                   MASSE_A_SECHER[c, i] * coefficient(c, True) * pci(c, True) for c in matiere_humid) == energ_brut))
+        CONTR_A_SECHER.append(model.addConstr(quicksum(MASSE_A_SECHER[p,i] for p in matiere_humid) <= 150*kt))
+        for j in matiere_humid:
+            CONTR_A_SECHER.append(model.addConstr(MASSE[j,i] == MASSE_HUMID[j,i] + MASSE_A_SECHER[j,i]))
+    else:
+        CONTR_PROD.append(model.addConstr(quicksum(MASSE[c, i] * pci(c,False) for c in combustibles) == energ_brut))
     biomasse_brute = quicksum(MASSE[c,i] for c in ['vert', 'recy', 'bois'])
-    CONTR_STOCK.append(model.addConstr(biomasse_brute <= 365 * capacite_jour))
+    CONTR_STOCK.append(model.addConstr(biomasse_brute <= 365 * capacite_jour * (1 + duplic_capacite) ))
     CONTR_BOIS.append(model.addConstr(MASSE['bois', i] ==  quicksum(MASSE_BOIS_PROVE[p,i] for p in bois_prove)))
     CONTR_COUT_INCORPO.append(model.addConstr(biomasse >= MASSE['carb', i] - masse_max_charbon * (1 - INCORPORATION_BIOMASSE[i])))
-    CONTR_A_SECHER.append(model.addConstr(quicksum(MASSE_A_SECHER[p,i] for p in matiere_humid) <= 150*kt))
-    for j in matiere_humid:
-        CONTR_A_SECHER.append(model.addConstr(MASSE[j,i] == MASSE_HUMID[j,i] + MASSE_A_SECHER[j,i]))
 
 model.write('new.lp')
 model.optimize()

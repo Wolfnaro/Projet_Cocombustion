@@ -54,7 +54,7 @@ duplic_capacite = False                  # €
 cout_duplic_capacite = 500000*euro                  # €
 capacite_jour = 1500 * ton                      # t/jour
 
-dispositif_sechage = True                       # True si on va utliser le dispositive de sechage
+dispositif_sechage = False                       # True si on va utliser le dispositive de sechage
 quantite_dispositives_sechage = 1
 instalation_sechage = 600000*euro              # €
 capacite_sechage = 150*kt                       # kt/an
@@ -164,8 +164,11 @@ def pci(combustible,sechage):
     return pcigj/(3.6 * ton)
 
 # prix unitaire en euro/MWh
-def p_vente(combustible):
+def p_vente(combustible,n):
+#    n=1
+#    t=0.02
     return 43*euro if combustible=='carb' else 115*euro
+#    return 43*euro*(1+t)**n if combustible=='carb' else 115*euro*(1+t)**n
 
 # dispo en kton
 def dispo_bois(prove, annee):
@@ -228,9 +231,9 @@ for i in range(horizon):
 benef = []
 for i in range(horizon):
     if dispositif_sechage :
-        benef.append(quicksum((p_vente(c) * pci(c,False) * efficacite - p_achat[c]) * MASSE[c,i] for c in pas_besoin_secher)
-                     + quicksum(coefficient(c,False) * MASSE_HUMID[c,i] * pci(c,False) * efficacite * p_vente(c) for c in matiere_humid)                       # (vent humid total)
-                     + quicksum(coefficient(c,True) * MASSE_A_SECHER[c,i] * (pci(c,True)  * efficacite * p_vente(c)) for c in matiere_humid)    # (vent du seché)
+        benef.append(quicksum((p_vente(c,i) * pci(c,False) * efficacite - p_achat[c]) * MASSE[c,i] for c in pas_besoin_secher)
+                     + quicksum(coefficient(c,False) * MASSE_HUMID[c,i] * pci(c,False) * efficacite * p_vente(c,i) for c in matiere_humid)                       # (vent humid total)
+                     + quicksum(coefficient(c,True) * MASSE_A_SECHER[c,i] * (pci(c,True)  * efficacite * p_vente(c,i)) for c in matiere_humid)    # (vent du seché)
                      - quicksum(MASSE[c,i] * p_achat[c] for c in matiere_humid)   # 'biog' 'vert'                                                  # (achat total)
 
 #                     - quicksum(dispo_vert[c] * LAMBDA_VAR[c,i] * PRIX_ACHAT_VERT[i] for c in residus_vert)    #'vert'                                                   # (achat total)
@@ -240,7 +243,7 @@ for i in range(horizon):
                      - quicksum(p_achat_bois[p]*MASSE_BOIS_PROVE[p,i] for p in bois_prove) 
                      - (cout_incorp_0 * (1 - INCORPORATION_BIOMASSE[i]) + cout_incorp_1 * INCORPORATION_BIOMASSE[i]) * energ_prod)            #c'est bien energie prod? ou plutot energie biomasse efficace ?
     else:
-        benef.append(quicksum((p_vente(c) * pci(c,False) * efficacite - p_achat[c]) * MASSE[c,i] for c in combustibles)
+        benef.append(quicksum((p_vente(c,i) * pci(c,False) * efficacite - p_achat[c]) * MASSE[c,i] for c in combustibles)
 
 #                     - quicksum(dispo_vert[c] * LAMBDA_VAR[c,i] * PRIX_ACHAT_VERT[i] for c in residus_vert)    #'vert'                                                   # (achat total)
 #                     - quicksum(dispo_vert[c] * LAMBDA_VAR[c,i] * p_achat_vert[c] for c in residus_vert)    #'vert'                                                   # (achat total)

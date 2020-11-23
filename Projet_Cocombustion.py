@@ -188,15 +188,15 @@ assert model.status == GRB.status.OPTIMAL, f"solver stopped with status {M.statu
 for i in (0, horizon-1):
     print(f"masse de combustibles à année {i+1} est :")
     for c in combustibles:
-        print(f"{c}: {MASSE[c,i].x:.1f}")
-    print(f"profit pour année {i+1} = {benef[i].getValue():.2f}")
+        print(f"{c}: {MASSE[c,i].x:.1f} kton")
+    print(f"profit pour année {i+1} = {benef[i].getValue():.2f} Million d'euros")
     ratio = MASSE['carb',i].x / sum(MASSE[c,i].x for c in combustibles)
     print(f"ratio charbon/masse totale à année {i+1} est : {ratio*100:.0f} %")
     
-# Calcul du coefficient des Masses
-    for c in combustibles:
-        coef_combustible = pci(c,dispositif_sechage)*efficacite*p_vente(c,i) - p_achat[c] 
-        print(f"Poid {c}: {coef_combustible:.4f}")
+# # Calcul du coefficient des Masses
+#     for c in combustibles:
+#         coef_combustible = pci(c,dispositif_sechage)*efficacite*p_vente(c,i) - p_achat[c] 
+#         print(f"Poid {c}: {coef_combustible:.4f}")
     
 # # 
 #     for b in bois_prove:

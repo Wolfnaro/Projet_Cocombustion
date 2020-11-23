@@ -1,0 +1,5 @@
+lbenef = []
+for i in range(20):
+    lbenef.append(benef[i])
+plt.plot(range(20), lbenef)
+plt.show()
